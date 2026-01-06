@@ -33,7 +33,9 @@ function App() {
   const lastFetchTime = useRef(0)
   const apiKey = import.meta.env.VITE_ALPHA_API_KEY
 
-  const handleSearch = async () => {
+  const handleSearch = async (e) => {
+    e.preventDefault()
+
     const now = Date.now()
     if (now - lastFetchTime.current < 15000) {
       setError('15秒以上待ってから検索してください')
@@ -52,6 +54,8 @@ function App() {
     setTimeSeries(null)
 
     const symbol = keyword.toUpperCase()
+    console.log('検索したsymbol:', symbol)
+    console.log('API KEY:', apiKey)
 
     try {
       const [quoteRes, tsRes] = await Promise.all([
@@ -66,21 +70,24 @@ function App() {
       const quoteData = await quoteRes.json()
       const tsData = await tsRes.json()
 
-      // API制限チェック
+      // ★ここで必ず出力
+      console.log('=== デバッグ: quoteData ===')
+      console.log(quoteData)
+      console.log('=== デバッグ: tsData ===')
+      console.log(tsData)
+
       if (quoteData.Note || tsData.Note) {
         setError('APIのリクエスト制限に達しました。少し待ってください')
         return
       }
 
-      // 株価
-      if (quoteData['Global Quote']?.['01. symbol']) {
-        setStockData(quoteData['Global Quote'])
-      } else {
+      if (!quoteData['Global Quote']?.['01. symbol']) {
         setError('株価情報が見つかりませんでした')
         return
       }
 
-      // 日足（直近30日）
+      setStockData(quoteData['Global Quote'])
+
       if (tsData['Time Series (Daily)']) {
         const entries = Object.entries(tsData['Time Series (Daily)'])
           .slice(0, 30)
@@ -95,22 +102,20 @@ function App() {
     }
   }
 
-  const chartData = timeSeries
-    ? {
-        labels: Object.keys(timeSeries),
-        datasets: [
-          {
-            label: `${keyword.toUpperCase()} 株価（日足）`,
-            data: Object.values(timeSeries).map(d =>
-              parseFloat(d['4. close'])
-            ),
-            borderColor: 'rgb(37, 99, 235)',
-            backgroundColor: 'rgba(37, 99, 235, 0.2)',
-            tension: 0.3
-          }
-        ]
+  const chartData = timeSeries && {
+    labels: Object.keys(timeSeries),
+    datasets: [
+      {
+        label: `${keyword.toUpperCase()} 株価（日足）`,
+        data: Object.values(timeSeries).map(d =>
+          parseFloat(d['4. close'])
+        ),
+        borderColor: 'rgb(37, 99, 235)',
+        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+        tension: 0.3
       }
-    : null
+    ]
+  }
 
   return (
     <div className="app">
@@ -119,23 +124,22 @@ function App() {
         <h1>株価検索アプリ by KeiZi</h1>
       </header>
 
-      <div className="search-area">
+      <form className="search-area" onSubmit={handleSearch}>
         <input
           type="text"
           placeholder="例: AAPL, TSLA, 7203.T"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <button onClick={handleSearch} disabled={loading}>
+        <button type="submit" disabled={loading}>
           {loading ? '取得中...' : '検索'}
         </button>
-      </div>
+      </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
 
       {stockData && chartData && (
         <div className="result-area">
-          {/* 株価カード */}
           <div className="stock-card">
             <h2>{stockData['01. symbol']}</h2>
             <p className="price">{stockData['05. price']} USD</p>
@@ -143,7 +147,6 @@ function App() {
             <p>変化率: {stockData['10. change percent']}</p>
           </div>
 
-          {/* チャート */}
           <div className="chart-wrapper">
             <Line data={chartData} />
           </div>

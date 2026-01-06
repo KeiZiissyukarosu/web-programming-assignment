@@ -5,6 +5,7 @@
   margin: 20px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: #111;
+  background-color: #f8fafc;
 }
 
 /* =========================
@@ -14,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .app-header .logo {
@@ -30,22 +31,31 @@
   gap: 10px;
   align-items: center;
   max-width: 600px;
+  margin-bottom: 12px;
 }
 
 .search-area input {
   flex: 1;
-  padding: 10px;
+  padding: 10px 12px;
   font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #cbd5f5;
+}
+
+.search-area input:focus {
+  outline: none;
+  border-color: #2563eb;
 }
 
 .search-area button {
-  padding: 10px 14px;
+  padding: 10px 16px;
   font-size: 16px;
   cursor: pointer;
   background-color: #2563eb;
   color: #fff;
   border: none;
   border-radius: 6px;
+  transition: background-color 0.2s;
 }
 
 .search-area button:disabled {
@@ -62,12 +72,12 @@
 ========================= */
 .error {
   margin-top: 12px;
-  color: red;
+  color: #dc2626;
   font-weight: bold;
 }
 
 /* =========================
-   結果エリア（カード + チャート）
+   結果エリア
 ========================= */
 .result-area {
   display: flex;
@@ -85,11 +95,12 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .stock-card h2 {
   margin-bottom: 12px;
+  font-size: 1.2rem;
 }
 
 .stock-card .price {
@@ -107,7 +118,7 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* =========================
