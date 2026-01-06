@@ -103,11 +103,20 @@
   font-size: 1.2rem;
 }
 
-.stock-card .price {
-  font-size: 1.6rem;
-  font-weight: bold;
+.stock-card p {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+/* 前日比の色分け */
+.stock-card .up {
   color: #2563eb;
-  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.stock-card .down {
+  color: #dc2626;
+  font-weight: bold;
 }
 
 /* =========================
