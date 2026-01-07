@@ -17,7 +17,7 @@ import 'chartjs-adapter-date-fns'
 import kabuImage from './assets/kabu_chart_smartphone_woman_happy.png'
 import './index.css'
 
-// ===== register chart.js components =====
+// ===== chart.js register =====
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -32,6 +32,7 @@ function App() {
   const [keyword, setKeyword] = useState('')
   const [stockData, setStockData] = useState(null)
   const [chartData, setChartData] = useState(null)
+  const [companyInfo, setCompanyInfo] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -56,15 +57,18 @@ function App() {
     setLoading(true)
     setStockData(null)
     setChartData(null)
+    setCompanyInfo(null)
 
     const symbol = keyword.toUpperCase()
 
     try {
+      // ===== Yahoo Finance =====
       const res = await fetch(
         `/yahoo/v8/finance/chart/${symbol}?interval=1d&range=1mo`
       )
       const json = await res.json()
       const result = json.chart?.result?.[0]
+
       if (!result) {
         setError('データが取得できませんでした')
         return
@@ -73,26 +77,28 @@ function App() {
       const quote = result.indicators.quote[0]
       const timestamps = result.timestamp
 
-      // 株価カード用データ（最後の取引日）
       const lastIndex = quote.close.length - 1
       const close = quote.close[lastIndex]
       const prevClose = result.meta.chartPreviousClose
       const change = close - prevClose
       const changePercent = ((change / prevClose) * 100).toFixed(2)
 
+      const currency = result.meta.currency || ''
+
       setStockData({
         symbol: result.meta.symbol,
+        name: result.meta.longName || result.meta.shortName,
+        currency,
         close: close.toFixed(2),
         change: change.toFixed(2),
-        changePercent: changePercent,
+        changePercent,
         open: quote.open[lastIndex].toFixed(2),
         high: quote.high[lastIndex].toFixed(2),
         low: quote.low[lastIndex].toFixed(2),
-        volume: quote.volume[lastIndex],
-        sales: (quote.volume[lastIndex] * close).toFixed(0)
+        volume: quote.volume[lastIndex]
       })
 
-      // ローソク足データ
+      // ===== Candlestick =====
       const candles = timestamps
         .map((ts, i) => ({
           x: ts * 1000,
@@ -116,6 +122,24 @@ function App() {
           }
         ]
       })
+
+      // ===== Wikipedia =====
+      const companyName =
+        result.meta.longName || result.meta.shortName
+
+      const wikiRes = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(companyName)}`
+      )
+      const wikiJson = await wikiRes.json()
+
+      if (wikiJson.extract) {
+        setCompanyInfo({
+          title: wikiJson.title,
+          description: wikiJson.extract,
+          thumbnail: wikiJson.thumbnail?.source,
+          url: wikiJson.content_urls?.desktop?.page
+        })
+      }
     } catch (err) {
       console.error(err)
       setError('取得に失敗しました')
@@ -126,15 +150,17 @@ function App() {
 
   return (
     <div className="app">
+      {/* ===== Header ===== */}
       <header className="app-header">
-        <img src={kabuImage} alt="株価イメージ" className="logo" />
+        <img src={kabuImage} alt="株価" className="logo" />
         <h1>株価検索アプリ by KeiZi</h1>
       </header>
 
+      {/* ===== Search ===== */}
       <form className="search-area" onSubmit={handleSearch}>
         <input
           type="text"
-          placeholder="例: AAPL, TSLA, 7203.T"
+          placeholder="例: AAPL, BA, TSLA, 7203.T"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
@@ -146,41 +172,75 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {stockData && chartData && (
-        <div className="result-area">
-          {/* 株価カード */}
-          <div className="stock-card">
-            <h2>{stockData.symbol}</h2>
-            <p>終値: {stockData.close}</p>
-            <p>
-              前日比:{' '}
-              <span className={stockData.change >= 0 ? 'up' : 'down'}>
-                {stockData.change} ({stockData.changePercent}%)
-              </span>
-            </p>
-            <p>始値: {stockData.open}</p>
-            <p>高値: {stockData.high}</p>
-            <p>安値: {stockData.low}</p>
-            <p>出来高: {stockData.volume.toLocaleString()}</p>
-            <p>売上代金: {Number(stockData.sales).toLocaleString()}</p>
+        <>
+          {/* ===== Stock + Chart ===== */}
+          <div className="result-area">
+            <div className="stock-card">
+              <h2>{stockData.symbol}</h2>
+              <p className="company-name">{stockData.name}</p>
+
+              <p>
+                終値: {stockData.close} {stockData.currency}
+              </p>
+              <p>
+                前日比:{' '}
+                <span className={stockData.change >= 0 ? 'up' : 'down'}>
+                  {stockData.change} ({stockData.changePercent}%)
+                </span>
+              </p>
+              <p>始値: {stockData.open}</p>
+              <p>高値: {stockData.high}</p>
+              <p>安値: {stockData.low}</p>
+              <p>
+                出来高: {stockData.volume.toLocaleString()} 株
+              </p>
+            </div>
+
+            <div className="chart-wrapper">
+              <Chart
+                type="candlestick"
+                data={chartData}
+                options={{
+                  responsive: true,
+                  scales: {
+                    x: {
+                      type: 'time',
+                      time: { unit: 'day' }
+                    }
+                  }
+                }}
+              />
+            </div>
           </div>
 
-          {/* ローソク足チャート */}
-          <div className="chart-wrapper">
-            <Chart
-              type="candlestick"
-              data={chartData}
-              options={{
-                responsive: true,
-                scales: {
-                  x: {
-                    type: 'time',
-                    time: { unit: 'day' }
-                  }
-                }
-              }}
-            />
-          </div>
-        </div>
+          {/* ===== Company Info ===== */}
+          {companyInfo && (
+            <div className="company-info">
+              <h3>
+                {stockData.symbol} = {companyInfo.title}
+              </h3>
+
+              <div className="company-body">
+                {companyInfo.thumbnail && (
+                  <img
+                    src={companyInfo.thumbnail}
+                    alt={companyInfo.title}
+                  />
+                )}
+                <p>{companyInfo.description}</p>
+              </div>
+
+              <a
+                href={companyInfo.url}
+                target="_blank"
+                rel="noreferrer"
+                className="wiki-link"
+              >
+                Wikipediaで見る
+              </a>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

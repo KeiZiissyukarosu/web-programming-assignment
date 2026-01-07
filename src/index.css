@@ -1,16 +1,11 @@
-/* =========================
-   全体
-========================= */
+/* ===== 全体 ===== */
 .app {
   margin: 20px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #111;
   background-color: #f8fafc;
 }
 
-/* =========================
-   ヘッダー
-========================= */
+/* ===== Header ===== */
 .app-header {
   display: flex;
   align-items: center;
@@ -18,133 +13,117 @@
   margin-bottom: 24px;
 }
 
-.app-header .logo {
+.logo {
   width: 48px;
-  height: auto;
 }
 
-/* =========================
-   検索エリア
-========================= */
+/* ===== Search ===== */
 .search-area {
   display: flex;
   gap: 10px;
-  align-items: center;
   max-width: 600px;
-  margin-bottom: 12px;
 }
 
 .search-area input {
   flex: 1;
-  padding: 10px 12px;
+  padding: 10px;
   font-size: 16px;
   border-radius: 6px;
   border: 1px solid #cbd5f5;
 }
 
-.search-area input:focus {
-  outline: none;
-  border-color: #2563eb;
-}
-
 .search-area button {
   padding: 10px 16px;
-  font-size: 16px;
-  cursor: pointer;
-  background-color: #2563eb;
+  background: #2563eb;
   color: #fff;
   border: none;
   border-radius: 6px;
-  transition: background-color 0.2s;
 }
 
 .search-area button:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
+  background: #94a3b8;
 }
 
-.search-area button:hover:not(:disabled) {
-  background-color: #1d4ed8;
-}
-
-/* =========================
-   エラー表示
-========================= */
+/* ===== Error ===== */
 .error {
-  margin-top: 12px;
   color: #dc2626;
-  font-weight: bold;
+  margin-top: 12px;
 }
 
-/* =========================
-   結果エリア
-========================= */
+/* ===== Result ===== */
 .result-area {
   display: flex;
   gap: 24px;
   margin-top: 30px;
-  align-items: stretch;
   flex-wrap: wrap;
 }
 
-/* =========================
-   株価カード
-========================= */
+/* ===== Stock Card ===== */
 .stock-card {
   width: 260px;
-  background: #ffffff;
+  background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
 .stock-card h2 {
-  margin-bottom: 12px;
-  font-size: 1.2rem;
+  margin-bottom: 4px;
 }
 
-.stock-card p {
-  margin-bottom: 6px;
-  font-size: 14px;
+.company-name {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 10px;
 }
 
-/* 前日比の色分け */
-.stock-card .up {
+.up {
   color: #2563eb;
   font-weight: bold;
 }
 
-.stock-card .down {
+.down {
   color: #dc2626;
   font-weight: bold;
 }
 
-/* =========================
-   チャート
-========================= */
+/* ===== Chart ===== */
 .chart-wrapper {
   width: 600px;
-  background: #ffffff;
+  background: #fff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-/* =========================
-   レスポンシブ
-========================= */
-@media (max-width: 768px) {
-  .result-area {
-    flex-direction: column;
-    align-items: center;
-  }
+/* ===== Company Info ===== */
+.company-info {
+  margin-top: 32px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
 
+.company-body {
+  display: flex;
+  gap: 16px;
+}
+
+.company-body img {
+  width: 120px;
+  border-radius: 8px;
+}
+
+.wiki-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #2563eb;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
   .chart-wrapper {
     width: 100%;
-  }
-
-  .stock-card {
-    width: 100%;
-    max-width: 360px;
   }
 }
