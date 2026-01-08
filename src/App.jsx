@@ -98,7 +98,7 @@ function App() {
         volume: quote.volume[lastIndex]
       })
 
-      // ===== Candlestick =====
+      // ===== ローソク足描画 =====
       const candles = timestamps
         .map((ts, i) => ({
           x: ts * 1000,
@@ -156,7 +156,7 @@ function App() {
         <h1>株価検索アプリ by KeiZi</h1>
       </header>
 
-      {/* ===== Search ===== */}
+      {/* ===== 検索 ===== */}
       <form className="search-area" onSubmit={handleSearch}>
         <input
           type="text"
@@ -173,7 +173,7 @@ function App() {
 
       {stockData && chartData && (
         <>
-          {/* ===== Stock + Chart ===== */}
+          {/* ===== 株＆チャート ===== */}
           <div className="result-area">
             <div className="stock-card">
               <h2>{stockData.symbol}</h2>
@@ -213,7 +213,7 @@ function App() {
             </div>
           </div>
 
-          {/* ===== Company Info ===== */}
+          {/* ===== 会社情報 ===== */}
           {companyInfo && (
             <div className="company-info">
               <h3>
