@@ -1,161 +1,210 @@
-/* ===== 全体 ===== */
-.app {
-  margin: 20px;
+/* =========================
+   全体
+========================= */
+:root {
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --primary: #1e40af;
+  --secondary: #64748b;
+  --error: #ef4444;
+  --positive: #16a34a; /* 前日比プラス */
+  --negative: #ef4444; /* 前日比マイナス */
+  --shadow: rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
+  --transition: 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  margin: 0;
+  padding: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--bg);
+  color: #111;
+  min-height: 100vh;
 }
 
-/* ===== Header ===== */
-.app-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+/* =========================
+   アプリ全体
+========================= */
+.app {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 20px;
 }
 
-.logo {
-  width: 48px;
+/* =========================
+   タイトル
+========================= */
+h1 {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 30px;
 }
 
-/* ===== Search ===== */
-.search-area {
-  display: flex;
-  gap: 10px;
-  max-width: 600px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.search-area input {
-  flex: 1 1 200px;
-  padding: 10px;
+/* =========================
+   入力欄
+========================= */
+input {
+  width: 100%;
+  padding: 12px 16px;
   font-size: 16px;
-  border-radius: 6px;
-  border: 1px solid #cbd5f5;
-}
-
-.search-area button {
-  flex: 0 0 auto;
-  padding: 10px 16px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-}
-
-.search-area button:disabled {
-  background: #94a3b8;
-}
-
-/* ===== Error ===== */
-.error {
-  color: #dc2626;
-  margin-top: 12px;
-}
-
-/* ===== Result Area ===== */
-.result-area {
-  display: flex;
-  gap: 24px;
-  margin-top: 30px;
-  flex-wrap: wrap; /* 横幅が狭いと自動で縦に折り返す */
-  justify-content: center;
-}
-
-/* ===== Stock Card ===== */
-.stock-card {
-  flex: 1 1 260px; /* 自動伸縮、最小幅260px */
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  min-width: 260px;
-}
-
-.stock-card h2 {
-  margin-bottom: 4px;
-}
-
-.company-name {
-  font-size: 13px;
-  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--border-radius);
+  outline: none;
+  transition: var(--transition);
   margin-bottom: 10px;
 }
 
-.up {
-  color: #2563eb;
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(30,64,175,0.2);
+}
+
+/* =========================
+   サジェストリスト
+========================= */
+ul.suggest {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--border-radius);
+  background-color: var(--card-bg);
+  box-shadow: 0 4px 6px var(--shadow);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+ul.suggest li {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+ul.suggest li:hover {
+  background-color: #e2e8f0;
+}
+
+/* =========================
+   エラー表示
+========================= */
+.error {
+  color: var(--error);
   font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
-.down {
-  color: #dc2626;
-  font-weight: bold;
-}
-
-/* ===== Chart ===== */
-.chart-wrapper {
-  flex: 1 1 300px; /* 自動伸縮、最小幅300px */
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  min-width: 300px;
-}
-
-.chart-wrapper canvas {
-  width: 100% !important;
-  height: auto !important;
-}
-
-/* ===== Company Info ===== */
-.company-info {
-  margin-top: 32px;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-.company-body {
+/* =========================
+   株価カード（改良版）
+========================= */
+.card {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: row;       /* 横並び */
+  align-items: flex-start;   /* 上揃え */
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px var(--shadow);
+  gap: 20px;                 /* 画像と情報の間隔 */
 }
 
-.company-body img {
-  width: 120px;
-  max-width: 100%;
+.card img {
+  width: 100px;
   height: auto;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
+  flex-shrink: 0;            /* 画像を縮めない */
 }
 
-.wiki-link {
+.card .info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;                  /* 各pタグの間隔 */
+}
+
+.card h2 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1.4rem;
+}
+
+.card p {
+  margin: 0;
+  color: var(--secondary);
+  line-height: 1.5;
+}
+
+/* 前日比の色分け */
+.positive {
+  color: var(--positive);
+  font-weight: bold;
+}
+
+.negative {
+  color: var(--negative);
+  font-weight: bold;
+}
+
+/* =========================
+   チャート
+========================= */
+canvas {
+  max-width: 100%;
+  margin-bottom: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+/* =========================
+   Wikipediaカード
+========================= */
+.wiki {
+  display: flex;
+  align-items: flex-start;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 50px;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.wiki img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-right: 15px;
+  border-radius: var(--border-radius);
+}
+
+.wiki .content {
+  flex: 1;
+}
+
+.wiki h3 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.wiki p {
+  color: var(--secondary);
+  line-height: 1.6;
+}
+
+.wiki a {
   display: inline-block;
-  margin-top: 12px;
-  color: #2563eb;
+  margin-top: 10px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
+  transition: var(--transition);
 }
 
-/* ===== Responsive Adjustments ===== */
-@media (max-width: 768px) {
-  .search-area input,
-  .search-area button {
-    width: 100%;
-  }
-
-  .result-area {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .stock-card,
-  .chart-wrapper {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .company-body {
-    flex-direction: column;
-    align-items: center;
-  }
+.wiki a:hover {
+  text-decoration: underline;
 }

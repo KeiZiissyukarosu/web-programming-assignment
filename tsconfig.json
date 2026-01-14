@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    /* 基本 */
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+    /* React / JSX */
+    "jsx": "react-jsx",
+
+    /* モジュール解決 */
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+
+    /* 型チェック */
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* 開発体験 */
+    "useDefineForClassFields": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}
