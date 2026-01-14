@@ -17,9 +17,6 @@ import 'chartjs-adapter-date-fns'
 
 import './index.css'
 
-/* =====================
-   Chart.js register
-===================== */
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -58,11 +55,16 @@ type Candle = {
   c: number
 }
 
-type CompanyInfo = {
-  title: string
-  description: string
-  logo?: string
-  url?: string
+/* =====================
+   ローマ字変換（簡易版）
+===================== */
+const kanaToRomaji = (str: string) => {
+  // 簡易対応：カタカナのみ
+  return str
+    .normalize('NFKC')
+    .replace(/トヨタ/g, 'Toyota') // 必要に応じて増やせる
+    .replace(/アップル/g, 'Apple')
+    .replace(/ソニー/g, 'Sony')
 }
 
 /* =====================
@@ -73,7 +75,7 @@ function App() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [stock, setStock] = useState<StockData | null>(null)
   const [chartData, setChartData] = useState<any>(null)
-  const [company, setCompany] = useState<CompanyInfo | null>(null)
+  const [company, setCompany] = useState<any>(null)
   const [error, setError] = useState('')
 
   const timer = useRef<number | null>(null)
@@ -90,9 +92,12 @@ function App() {
         return
       }
 
+      // 日本語ならローマ字変換
+      const query = /[^\x00-\x7F]/.test(value) ? kanaToRomaji(value) : value
+
       try {
         const res = await fetch(
-          `/yahoo/v1/finance/search?q=${encodeURIComponent(value)}`
+          `/yahoo/v1/finance/search?q=${encodeURIComponent(query)}`
         )
         const json = await res.json()
         const list: Suggestion[] =
@@ -118,6 +123,7 @@ function App() {
     setSuggestions([])
 
     try {
+      // 株価データ
       const res = await fetch(
         `/yahoo/v8/finance/chart/${symbol}?interval=1d&range=1mo`
       )
@@ -161,7 +167,7 @@ function App() {
         datasets: [{ label: `${symbol} ローソク足`, data: candles }]
       })
 
-      /* ===== 海外Wiki情報取得 ===== */
+      // 海外版Wikipedia取得
       const wikiRes = await fetch(
         `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
           r.meta.longName || r.meta.shortName
@@ -172,8 +178,8 @@ function App() {
         setCompany({
           title: wiki.title,
           description: wiki.extract,
-          logo: wiki.thumbnail?.source,
-          url: wiki.content_urls?.desktop?.page
+          url: wiki.content_urls?.desktop?.page,
+          thumbnail: wiki.thumbnail?.source || ''
         })
       }
     } catch {
@@ -181,9 +187,6 @@ function App() {
     }
   }
 
-  /* =====================
-     JSX
-  ===================== */
   return (
     <div className="app">
       <h1>株価検索アプリ by KeiZi</h1>
@@ -202,7 +205,7 @@ function App() {
 
       {suggestions.length > 0 && (
         <ul className="suggest">
-          {suggestions.map(s => (
+          {suggestions.map((s) => (
             <li
               key={s.symbol}
               onClick={() => {
@@ -219,8 +222,11 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {stock && (
-        <>
-          <div className="card">
+        <div className="card">
+          {company?.thumbnail && (
+            <img src={company.thumbnail} alt={stock.name} />
+          )}
+          <div className="info">
             <h2>{stock.name}</h2>
             <p>{stock.symbol}</p>
             <p>終値: {stock.close.toFixed(2)} {stock.currency}</p>
@@ -234,34 +240,30 @@ function App() {
               </span>
             </p>
           </div>
+        </div>
+      )}
 
-          {chartData && (
-            <Chart
-              type="candlestick"
-              data={chartData}
-              options={{ scales: { x: { type: 'time' } } } as ChartOptions}
-            />
-          )}
+      {chartData && (
+        <Chart
+          type="candlestick"
+          data={chartData}
+          options={{ scales: { x: { type: 'time' } } } as ChartOptions}
+        />
+      )}
 
-          {company && (
-            <div className="wiki">
-              <h3>{company.title}</h3>
-              {company.logo && (
-                <img
-                  src={company.logo}
-                  alt={`${company.title} logo`}
-                  style={{ maxWidth: '150px', marginBottom: '10px' }}
-                />
-              )}
-              <p>{company.description}</p>
-              {company.url && (
-                <a href={company.url} target="_blank" rel="noreferrer">
-                  Wikipediaで見る
-                </a>
-              )}
-            </div>
-          )}
-        </>
+      {company && (
+        <div className="wiki">
+          {company.thumbnail && <img src={company.thumbnail} alt={company.title} />}
+          <div className="content">
+            <h3>{company.title}</h3>
+            <p>{company.description}</p>
+            {company.url && (
+              <a href={company.url} target="_blank" rel="noreferrer">
+                Wikipediaで見る
+              </a>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )
