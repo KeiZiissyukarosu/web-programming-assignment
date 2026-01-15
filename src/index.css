@@ -31,6 +31,7 @@ body, html, #root {
    アプリ全体
 ========================= */
 .app {
+  width: 100%;
   max-width: 800px;
   margin: 40px auto;
   padding: 0 20px;
@@ -43,6 +44,7 @@ h1 {
   text-align: center;
   color: var(--primary);
   margin-bottom: 30px;
+  font-size: 1.5rem;
 }
 
 /* =========================
@@ -100,32 +102,32 @@ ul.suggest li:hover {
 }
 
 /* =========================
-   株価カード（改良版）
+   株価カード
 ========================= */
 .card {
   display: flex;
-  flex-direction: row;       /* 横並び */
-  align-items: flex-start;   /* 上揃え */
+  flex-direction: row;
+  align-items: flex-start;
   background-color: var(--card-bg);
   border-radius: var(--border-radius);
   padding: 20px;
   margin-bottom: 30px;
   box-shadow: 0 4px 6px var(--shadow);
-  gap: 20px;                 /* 画像と情報の間隔 */
+  gap: 20px;
 }
 
 .card img {
   width: 100px;
   height: auto;
   border-radius: var(--border-radius);
-  flex-shrink: 0;            /* 画像を縮めない */
+  flex-shrink: 0;
 }
 
 .card .info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;                  /* 各pタグの間隔 */
+  gap: 6px;
 }
 
 .card h2 {
@@ -140,7 +142,6 @@ ul.suggest li:hover {
   line-height: 1.5;
 }
 
-/* 前日比の色分け */
 .positive {
   color: var(--positive);
   font-weight: bold;
@@ -155,6 +156,7 @@ ul.suggest li:hover {
    チャート
 ========================= */
 canvas {
+  width: 100% !important;
   max-width: 100%;
   margin-bottom: 30px;
   border-radius: var(--border-radius);
@@ -166,19 +168,20 @@ canvas {
 ========================= */
 .wiki {
   display: flex;
+  flex-direction: row;
   align-items: flex-start;
   background-color: var(--card-bg);
   border-radius: var(--border-radius);
   padding: 20px;
   margin-bottom: 50px;
   box-shadow: 0 4px 6px var(--shadow);
+  gap: 15px;
 }
 
 .wiki img {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  margin-right: 15px;
   border-radius: var(--border-radius);
 }
 
@@ -207,4 +210,76 @@ canvas {
 
 .wiki a:hover {
   text-decoration: underline;
+}
+
+/* =========================
+   ニュースティッカー
+========================= */
+.news-ticker {
+  overflow-x: auto;
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px var(--shadow);
+  margin-bottom: 20px;
+}
+
+.news-ticker a {
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: var(--secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.news-ticker a:hover {
+  color: var(--primary);
+}
+
+/* =========================
+   レスポンシブ対応（スマホ用）
+========================= */
+@media (max-width: 500px) {
+  .card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+  }
+
+  .wiki {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .wiki img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  input {
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+
+  .card h2 {
+    font-size: 1.2rem;
+  }
+
+  .card p, .wiki p, .news-ticker a {
+    font-size: 0.85rem;
+  }
 }
