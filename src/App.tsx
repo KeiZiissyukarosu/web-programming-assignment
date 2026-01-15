@@ -193,7 +193,7 @@ function App() {
 
       <input
         value={keyword}
-        placeholder="Apple / トヨタ / AAPL / 7203.T"
+        placeholder="Apple / AAPL / 7203.T"
         onChange={(e) => {
           setKeyword(e.target.value)
           fetchSuggestions(e.target.value)
