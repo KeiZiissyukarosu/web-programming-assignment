@@ -9,7 +9,7 @@
     "jsx": "react-jsx",
 
     /* モジュール解決 */
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "esModuleInterop": true,
 
     /* 型チェック */

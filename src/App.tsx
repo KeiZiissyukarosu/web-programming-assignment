@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Chart } from 'react-chartjs-2'
+import { useState, useRef } from 'react';
+import { Chart } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -7,16 +7,66 @@ import {
   TimeScale,
   Tooltip,
   Legend,
-  ChartOptions
-} from 'chart.js'
+  ChartOptions,
+  ChartData
+} from 'chart.js';
 import {
   CandlestickController,
   CandlestickElement
-} from 'chartjs-chart-financial'
-import 'chartjs-adapter-date-fns'
+} from 'chartjs-chart-financial';
+import 'chartjs-adapter-date-fns';
 
-import './index.css'
+import './index.css';
 
+/* =====================
+   型定義
+===================== */
+type Suggestion = {
+  symbol: string;
+  name: string;
+};
+
+type StockData = {
+  symbol: string;
+  name: string;
+  currency: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  change: number;
+  changePercent: string;
+};
+
+type Candle = {
+  x: number;
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+};
+
+type CompanyInfo = {
+  title: string;
+  description: string;
+  url?: string;
+  thumbnail?: string;
+};
+
+/* =====================
+   ローマ字変換（簡易版）
+===================== */
+const kanaToRomaji = (str: string) => {
+  return str
+    .normalize('NFKC')
+    .replace(/トヨタ/g, 'Toyota')
+    .replace(/アップル/g, 'Apple')
+    .replace(/ソニー/g, 'Sony');
+};
+
+/* =====================
+   ChartJS登録
+===================== */
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,122 +75,77 @@ ChartJS.register(
   CandlestickElement,
   Tooltip,
   Legend
-)
-
-/* =====================
-   型定義
-===================== */
-type Suggestion = {
-  symbol: string
-  name: string
-}
-
-type StockData = {
-  symbol: string
-  name: string
-  currency: string
-  open: number
-  high: number
-  low: number
-  close: number
-  change: number
-  changePercent: string
-}
-
-type Candle = {
-  x: number
-  o: number
-  h: number
-  l: number
-  c: number
-}
-
-/* =====================
-   ローマ字変換（簡易版）
-===================== */
-const kanaToRomaji = (str: string) => {
-  // 簡易対応：カタカナのみ
-  return str
-    .normalize('NFKC')
-    .replace(/トヨタ/g, 'Toyota') // 必要に応じて増やせる
-    .replace(/アップル/g, 'Apple')
-    .replace(/ソニー/g, 'Sony')
-}
+);
 
 /* =====================
    App Component
 ===================== */
 function App() {
-  const [keyword, setKeyword] = useState('')
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-  const [stock, setStock] = useState<StockData | null>(null)
-  const [chartData, setChartData] = useState<any>(null)
-  const [company, setCompany] = useState<any>(null)
-  const [error, setError] = useState('')
-
-  const timer = useRef<number | null>(null)
+  const [keyword, setKeyword] = useState('');
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [stock, setStock] = useState<StockData | null>(null);
+  const [chartData, setChartData] = useState<ChartData<'candlestick'> | null>(null);
+  const [company, setCompany] = useState<CompanyInfo | null>(null);
+  const [error, setError] = useState('');
+  const timer = useRef<number | null>(null);
 
   /* =====================
      入力補完
   ===================== */
   const fetchSuggestions = (value: string) => {
-    if (timer.current) window.clearTimeout(timer.current)
+    if (timer.current) window.clearTimeout(timer.current);
 
     timer.current = window.setTimeout(async () => {
       if (!value) {
-        setSuggestions([])
-        return
+        setSuggestions([]);
+        return;
       }
 
-      // 日本語ならローマ字変換
-      const query = /[^\x00-\x7F]/.test(value) ? kanaToRomaji(value) : value
+      const query = /[^\x00-\x7F]/.test(value) ? kanaToRomaji(value) : value;
 
       try {
-        const res = await fetch(
-          `/yahoo/v1/finance/search?q=${encodeURIComponent(query)}`
-        )
-        const json = await res.json()
+        const res = await fetch(`/yahoo/v1/finance/search?q=${encodeURIComponent(query)}`);
+        const json = await res.json();
+
         const list: Suggestion[] =
           json.quotes?.slice(0, 5).map((q: any) => ({
             symbol: q.symbol,
             name: q.shortname || q.longname || ''
-          })) ?? []
-        setSuggestions(list)
+          })) ?? [];
+
+        setSuggestions(list);
       } catch {
-        setSuggestions([])
+        setSuggestions([]);
       }
-    }, 400)
-  }
+    }, 400);
+  };
 
   /* =====================
      株価検索
   ===================== */
   const searchStock = async (symbol: string) => {
-    setError('')
-    setStock(null)
-    setChartData(null)
-    setCompany(null)
-    setSuggestions([])
+    setError('');
+    setStock(null);
+    setChartData(null);
+    setCompany(null);
+    setSuggestions([]);
 
     try {
-      // 株価データ
-      const res = await fetch(
-        `/yahoo/v8/finance/chart/${symbol}?interval=1d&range=1mo`
-      )
-      const json = await res.json()
-      const r = json.chart?.result?.[0]
-
+      // 株価データ取得
+      const res = await fetch(`/yahoo/v8/finance/chart/${symbol}?interval=1d&range=1mo`);
+      const json = await res.json();
+      const r = json.chart?.result?.[0];
       if (!r) {
-        setError('株価データ取得失敗')
-        return
+        setError('株価データ取得失敗');
+        return;
       }
 
-      const quote = r.indicators.quote[0]
-      const timestamps: number[] = r.timestamp
-      const last = quote.close.length - 1
-      const close = quote.close[last]
-      const prev = r.meta.chartPreviousClose
-      const change = close - prev
+      const quote = r.indicators.quote[0];
+      const timestamps: number[] = r.timestamp;
+      const last = quote.close.length - 1;
+      const close = quote.close[last];
+      const prev = r.meta.chartPreviousClose;
+      const change = close - prev;
 
       setStock({
         symbol: r.meta.symbol,
@@ -152,40 +157,44 @@ function App() {
         close,
         change,
         changePercent: ((change / prev) * 100).toFixed(2)
-      })
+      });
 
-      const candles: Candle[] = timestamps.map((t, i) => {
-        const o = quote.open[i]
-        const h = quote.high[i]
-        const l = quote.low[i]
-        const c = quote.close[i]
-        if (o == null || h == null || l == null || c == null) return null
-        return { x: t * 1000, o, h, l, c }
-      }).filter(Boolean) as Candle[]
+      // ローソク足データ作成
+      const candles: Candle[] = timestamps
+        .map((t, i) => {
+          const o = quote.open[i];
+          const h = quote.high[i];
+          const l = quote.low[i];
+          const c = quote.close[i];
+          if (o == null || h == null || l == null || c == null) return null;
+          return { x: t * 1000, o, h, l, c };
+        })
+        .filter((c): c is Candle => c !== null);
 
       setChartData({
         datasets: [{ label: `${symbol} ローソク足`, data: candles }]
-      })
+      });
 
-      // 海外版Wikipedia取得
+      // Wikipedia情報取得
       const wikiRes = await fetch(
         `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
           r.meta.longName || r.meta.shortName
         )}`
-      )
-      const wiki = await wikiRes.json()
+      );
+      const wiki = await wikiRes.json();
+
       if (wiki.extract) {
         setCompany({
           title: wiki.title,
           description: wiki.extract,
           url: wiki.content_urls?.desktop?.page,
-          thumbnail: wiki.thumbnail?.source || ''
-        })
+          thumbnail: wiki.thumbnail?.source
+        });
       }
     } catch {
-      setError('取得エラー')
+      setError('取得エラー');
     }
-  }
+  };
 
   return (
     <div className="app">
@@ -195,11 +204,11 @@ function App() {
         value={keyword}
         placeholder="Apple / AAPL / 7203.T"
         onChange={(e) => {
-          setKeyword(e.target.value)
-          fetchSuggestions(e.target.value)
+          setKeyword(e.target.value);
+          fetchSuggestions(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') searchStock(keyword)
+          if (e.key === 'Enter') searchStock(keyword);
         }}
       />
 
@@ -209,8 +218,8 @@ function App() {
             <li
               key={s.symbol}
               onClick={() => {
-                setKeyword(s.symbol)
-                searchStock(s.symbol)
+                setKeyword(s.symbol);
+                searchStock(s.symbol);
               }}
             >
               <strong>{s.symbol}</strong> – {s.name}
@@ -223,9 +232,7 @@ function App() {
 
       {stock && (
         <div className="card">
-          {company?.thumbnail && (
-            <img src={company.thumbnail} alt={stock.name} />
-          )}
+          {company?.thumbnail && <img src={company.thumbnail} alt={stock.name} />}
           <div className="info">
             <h2>{stock.name}</h2>
             <p>{stock.symbol}</p>
@@ -257,16 +264,12 @@ function App() {
           <div className="content">
             <h3>{company.title}</h3>
             <p>{company.description}</p>
-            {company.url && (
-              <a href={company.url} target="_blank" rel="noreferrer">
-                Wikipediaで見る
-              </a>
-            )}
+            {company.url && <a href={company.url} target="_blank" rel="noreferrer">Wikipediaで見る</a>}
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
