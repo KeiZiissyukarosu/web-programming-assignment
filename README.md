@@ -9,7 +9,6 @@ React + Vite を用いたシンプルな構成で、
 また、Wikipedia API を利用して  
 **簡単な会社情報の表示**も行っています。
 
-※ 現在は **スマートフォン表示には未対応** です（今後改善予定）。
 
 ---
 
@@ -42,35 +41,33 @@ React + Vite を用いたシンプルな構成で、
 
 ## 使用技術（Tech Stack）
 
-- **React**  
-  UI 構築
-- **Vite**  
-  開発サーバー・ビルドツール
-- **Chart.js**
-- **chartjs-chart-financial**  
-  ローソク足チャート描画
-- **Yahoo Finance 非公式 API**  
-  株価データ取得
-- **Wikipedia REST API**  
-  会社情報取得
-
+- **Reacr / Vite**
+  モダンなフロントエンドでSPAを実装
+- **Chart.js / chartjs-chart-financial**
+  株価データの可視化(ローソク足チャート)
+- **Yahoo Finance(非公式API)**
+  株価データの取得
+- **Wikipedia REST API**
+  企業情報の掲載
 ---
 
 ## プロジェクト構成（Project Structure）
 
-├─ public/
+``` txt
+src/
+├─ public/            # 静的ファイル
 ├─ src/
-│ ├─ App.jsx # メインコンポーネント（UI・API通信・チャート）
-│ ├─ index.css # アプリ全体のスタイル
-│ └─ main.jsx # React エントリーポイント
-├─ vite.config.js # Vite 設定（Yahoo Finance 用 proxy）
-├─ package.json
+│  ├─ App.jsx         # メインコンポーネント（UI / API通信 / チャート描画）
+│  ├─ main.jsx        # React エントリーポイント
+│  └─ index.css       # グローバルスタイル
+├─ vite.config.js     # Vite 設定（Yahoo Finance 用 proxy）
+├─ package.json       # 依存関係 / npm scripts
 └─ README.md
-
+```
 
 ### ファイル説明
 
-- **App.jsx**  
+- **App.tsx**  
   株価検索フォーム、Yahoo Finance API 通信、  
   株価カード表示、ローソク足チャート描画、  
   Wikipedia API を用いた会社情報取得を管理するメインコンポーネント。
@@ -80,6 +77,19 @@ React + Vite を用いたシンプルな構成で、
 
 - **vite.config.js**  
   Yahoo Finance API の CORS 制限を回避するための proxy 設定。
+
+---
+## 公開先(デプロイ)
+
+本アプリは以下のサービスを利用して公開しています。
+
+- **Netlify**
+  URL: [text](https://stock-price-viewer-by-keizi.netlify.app/)
+
+- `npm run build` により生成された静的ファイルをデプロイ
+- フロントエンドアプリとしてホスティング
+
+
 
 ---
 
