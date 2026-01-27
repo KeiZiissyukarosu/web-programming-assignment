@@ -57,8 +57,8 @@ React + Vite を用いたシンプルな構成で、
 src/
 ├─ public/            # 静的ファイル
 ├─ src/
-│  ├─ App.jsx         # メインコンポーネント（UI / API通信 / チャート描画）
-│  ├─ main.jsx        # React エントリーポイント
+│  ├─ App.tsx         # メインコンポーネント（UI / API通信 / チャート描画）
+│  ├─ main.tsx        # React エントリーポイント
 │  └─ index.css       # グローバルスタイル
 ├─ vite.config.js     # Vite 設定（Yahoo Finance 用 proxy）
 ├─ package.json       # 依存関係 / npm scripts
