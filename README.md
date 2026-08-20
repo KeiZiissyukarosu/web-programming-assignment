@@ -81,7 +81,7 @@ src/
 ---
 ## 公開先(デプロイ)
 
-本アプリは以下のサービスを利用して公開しています。
+本アプリは以下のサービスを利用して公開しています。 以下
 
 - **Netlify**
   URL: [text](https://stock-price-viewer-by-keizi.netlify.app/)
